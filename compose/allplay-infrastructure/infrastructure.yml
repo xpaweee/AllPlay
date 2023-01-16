@@ -1,0 +1,103 @@
+version: "3.7"
+
+services:
+ 
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana-allplay
+    restart: unless-stopped
+    networks:
+      - allplay
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana:/var/lib/grafana
+
+  jaeger:
+    image: jaegertracing/all-in-one
+    container_name: jaeger-allplay
+    restart: unless-stopped
+    networks:
+      - allplay
+    ports:
+      - 5775:5775/udp
+      - 5778:5778
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 9411:9411
+      - 14268:14268
+      - 16686:16686
+
+  prometheus:
+    build: ./prometheus
+    container_name: prometheus-allplay
+    restart: unless-stopped
+    networks:
+      - allplay
+    ports:
+      - 9090:9090
+    volumes:
+      - prometheus:/prometheus
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-allplay
+    restart: unless-stopped
+    networks:
+      - allplay
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 15692:15692
+    volumes: 
+      - rabbitmq:/var/lib/rabbitmq
+
+  seq:
+    image: datalust/seq 
+    container_name: seq-allplay
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+    networks:
+      - allplay
+    ports:
+      - 5341:80
+    volumes: 
+      - seq:/data
+
+  postgres:
+    image: postgres
+    shm_size: '1gb'
+    container_name: postgres-allplay
+    restart: unless-stopped
+    networks:
+      - allplay
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+ 
+  
+
+
+
+networks:
+  allplay:
+    name: allplay-network
+
+volumes:
+  grafana:
+    driver: local
+  postgres:
+    driver: local
+  prometheus:
+    driver: local
+  rabbitmq:
+    driver: local
+  seq:
+    driver: local
+  
