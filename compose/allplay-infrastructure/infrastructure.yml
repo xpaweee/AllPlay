@@ -2,7 +2,6 @@ version: "3.7"
 
 services:
  
-
   grafana:
     image: grafana/grafana
     container_name: grafana-allplay
@@ -80,9 +79,26 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
- 
-  
+  consul:
+    image: consul
+    container_name: consul-allplay
+    restart: unless-stopped
+    networks:
+      - allplay
+    ports:
+      - 8500:8500
 
+  fabio:
+    image: fabiolb/fabio:1.6.1-arm64v8
+    container_name: fabio
+    restart: unless-stopped
+    environment:
+      - FABIO_REGISTRY_CONSUL_ADDR=consul:8500
+    networks:
+      - allplay
+    ports:
+      - 9998:9998
+      - 9999:9999
 
 
 networks:
